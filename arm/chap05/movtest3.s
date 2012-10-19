@@ -11,8 +11,7 @@ endvalues:
 .align 2
 .text
 main:
-	stmfd	sp!, {r0, r1, r4, r5, r6, lr}
-	nop
+	stmfd	sp!, {r0, r1, r4, r5, r6, lr} @ save the registers we use
 	mov	r4, #0
 	ldr	r5, =endvalues
 	ldr	r6, =values
@@ -23,7 +22,7 @@ loop:
 	cmp	r6, r5
 	bne	loop
 
-	ldmfd	sp!, {r0, r1, r4, r5, r6, pc}
+	ldmfd	sp!, {r0, r1, r4, r5, r6, pc} @ restore registers before exit
         mov     r7, #1                  @ set r7 to 1 - the syscall for exit
         swi     0                       @ then invoke the syscall from linux
 
