@@ -31,7 +31,7 @@ loop_start:
 	nop
 	ldr	r7, [r4], #datum_size		@ load one element
 	ldr	r8, [r4]			@ and next one
-	cmp	r7, r8				@ compare themx
+	cmp	r7, r8				@ compare them
 	ble	no_swap				@ branch if second greater
 
 	mov	r6, #1				@ set keep_going flag
