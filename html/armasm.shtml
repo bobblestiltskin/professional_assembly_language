@@ -16,6 +16,8 @@
 <!-- http://www.eng.auburn.edu/~nelson/courses/elec5260_6260/ARM_AssyLang.pdf -->
 <p>For most of the examples I followed those supplied with the excellent X86 assembly language book,<a href="http://www.amazon.co.uk/Professional-Assembly-Language-Programming-Programmer/dp/0764579010">Professional Assembly Language</a> by Richard Blum.</p>
 
+<p>The code is at <em>git@github.com:bobblestiltskin/professional_assembly_language.git</em> if you want to play with it.</p>
+
 <h4>Getting Started</h4>
 <ol>
 <li>Familiarity with <tt>gdb</tt> is useful.</li>
