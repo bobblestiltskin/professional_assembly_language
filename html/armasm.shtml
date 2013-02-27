@@ -1,0 +1,263 @@
+<html>
+<head>
+<link rel="stylesheet" href="./new.css" type="text/css">
+<title>An exploration of ARM assembly language</title>
+</head>
+<body>
+<h3>Introduction</h3>
+<p>This documents my investigation into assembly language programming on the ARM processor running my <a href="http://www.cyrius.com/debian/kirkwood/sheevaplug/unpack.html">SheevaPlug</a>. This runs <a href="http://www.debian.org">Debian GNU/Linux</a>. I use the <a href="http://www.gnu.org">GNU</a> assembler, <tt>gas</tt>, the GNU linker, <tt>ld</tt> and the GNU debugger, <tt>gdb</tt>.</p>
+
+<p>I referred to <a href="http://microcross.com/GNU-ARM-Assy-Quick-Ref.pdf">GNU-ARM-Assy-Quick-Ref.pdf</a> and <a href="http://www.bravegnu.org/gnu-eprog/asm-directives.html">More Assembler Directives</a>. The instruction set is defined <a href="http://www.peter-cockerell.net/aalp/">here</a></p>
+<p>More links are <a href="http://quirkygba.blogspot.com/2008/12/things-you-never-wanted-to-know-about.html">here</a>, <a href="http://omappedia.org/wiki/Writing_ARM_Assembly">here</a> and <a href="http://www.devrs.com/gba/files/gbadevfaqs.php">here</a></p>
+<!-- http://www.shervinemami.info/armAssembly.html -->
+<!-- http://www.coranac.com/tonc/text/asm.htm -->
+<!-- http://www.tofla.iconbar.com/tofla/arm/arm02/index.htm -->
+<!-- http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0204j/CEGECDGD.html -->
+<!-- http://www.eng.auburn.edu/~nelson/courses/elec5260_6260/ARM_AssyLang.pdf -->
+<p>For most of the examples I followed those supplied with the excellent X86 assembly language book,<a href="http://www.amazon.co.uk/Professional-Assembly-Language-Programming-Programmer/dp/0764579010">Professional Assembly Language</a> by Richard Blum.</p>
+
+<h4>Getting Started</h4>
+<ol>
+<li>Familiarity with <tt>gdb</tt> is useful.</li>
+<ul>
+<li>Use <tt>b _start</tt> to set a break point at the label _start:</li>
+<li>Use <tt>run</tt> to run to the break point.</li>
+<li><tt>s</tt> to step through from the break point</li>
+<li><tt>inspect registers</tt> or abbreviate to <tt>i r</tt></li>
+<li><tt>x/4d &data</tt> to eXamine 4 decimal items of data</tt>
+</ul>
+<p>This <a href="http://betterexplained.com/articles/debugging-with-gdb/">explains</a> the basic usage well.</p>
+<li>Communicating with Linux</li>
+<p>We can invoke a system call to the operating system, which allows us to pass back one parameter, as the exit code of the program.</p>
+<pre class="example">
+<!--#include virtual="examples/syscall.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/src/asm$ /usr/bin/as -gstabs -o syscall.o syscall.s
+bob@poland:~/src/asm$ /usr/bin/ld -o syscall syscall.o
+bob@poland:~/src/asm$ ./syscall 
+bob@poland:~/src/asm$ echo $?
+42
+bob@poland:~/src/asm$
+</pre>
+<li>The size of an executable</li>
+<p>The following 3 programs show the size allocated for uninitialised data.</p>
+<pre class="example">
+<!--#include virtual="examples/sizetest1.s" -->
+</pre>
+<pre class="example">
+<!--#include virtual="examples/sizetest2.s" -->
+</pre>
+<pre class="example">
+<!--#include virtual="examples/sizetest3.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$make sizetest1 sizetest2 sizetest3
+/usr/bin/as -gstabs -o sizetest1.o sizetest1.s
+/usr/bin/ld -o sizetest1 sizetest1.o
+/usr/bin/as -gstabs -o sizetest2.o sizetest2.s
+/usr/bin/ld -o sizetest2 sizetest2.o
+/usr/bin/as -gstabs -o sizetest3.o sizetest3.s
+/usr/bin/ld -o sizetest3 sizetest3.o
+bob@poland:~/www/examples$ls -l sizetest?
+-rwxr-xr-x 1 bob bob   938 Jul  3 16:17 sizetest1
+-rwxr-xr-x 1 bob bob  1072 Jul  3 16:17 sizetest2
+-rwxr-xr-x 1 bob bob 11072 Jul  3 16:17 sizetest3
+bob@poland:~/www/examples$
+</pre>
+<li>Communicating via C functions</li>
+<p>We can call C functions and pass parameters to them.</p>
+<pre class="example">
+<!--#include virtual="examples/printf.s" -->
+</pre>
+Note that we change <tt>_start</tt> to <tt>main</tt> since we use gcc to assemble and link because we want to link in the C library so that we can access <tt>printf</tt>.
+<pre class="system">
+bob@poland:~/src/asm$ gcc -o printf printf.s
+bob@poland:~/src/asm$ ./printf 
+Sum of 1 and 41 is 42
+bob@poland:~/src/asm$
+</pre>
+</ol>
+<h4>Moving Data</h4>
+<ol>
+<li>An example of moving data from memory to a register</li>
+<p>I write a makefile to build the software and use rodata (for my read-only data).</p>
+<pre class="example">
+<!--#include virtual="examples/movtest1.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ make movtest1
+/usr/bin/as -gstabs -o movtest1.o movtest1.s
+/usr/bin/ld -o movtest1 movtest1.o
+bob@poland:~/www/examples$ ./movtest1 
+bob@poland:~/www/examples$ echo $?
+42
+bob@poland:~/www/examples$
+</pre>
+<li>An example of moving register data to memory</li>
+<p>Read a value to r0, and store it to memory. Double the value of r0 then read back to r0. Our return code is the same as that stored rather than the doubled version. By implication, our store and load were executed correctly.</p>
+<pre class="example">
+<!--#include virtual="examples/movtest2.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ make movtest2
+/usr/bin/as -gstabs -o movtest2.o movtest2.s
+/usr/bin/ld -o movtest2 movtest2.o
+bob@poland:~/www/examples$ ./movtest2 
+bob@poland:~/www/examples$ echo $?
+9
+bob@poland:~/www/examples$
+</pre>
+<li>An example of using indexed memory locations</li>
+<p>The <tt>.equ</tt> directive is introduced which aliases a value to a name. We do so because we can easily change from using bytes for storage of the value to using half-words (of 2 bytes) or words (of 4 bytes) in the data section and modification of the <tt>ldrb</tt> instruction to <tt>ldrh</tt> or <tt>ldr</tt> respectively.</p>
+<p>Again we use <tt>gcc</tt> rather than <tt>as</tt> to assemble since we use the C function, <tt>printf</tt>.</p>
+<pre class="example">
+<!--#include virtual="examples/movtest3.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ make movtest3
+/usr/bin/gcc -gstabs -o movtest3 movtest3.s
+bob@poland:~/www/examples$ ./movtest3
+The value is 10
+The value is 15
+The value is 20
+The value is 25
+The value is 30
+The value is 35
+The value is 40
+The value is 45
+The value is 50
+The value is 55
+The value is 60
+bob@poland:~/www/examples$
+</pre>
+<li>An example of indirect addressing</li>
+<p>We write a constant to the second element of the vector and then read and return it.</p>
+<pre class="example">
+<!--#include virtual="examples/movtest4.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ make movtest4
+/usr/bin/as -gstabs -o movtest4.o movtest4.s
+/usr/bin/ld -o movtest4 movtest4.o
+bob@poland:~/www/examples$ ./movtest4 
+bob@poland:~/www/examples$ echo $?
+100
+bob@poland:~/www/examples$
+</pre>
+<li>Converting endianness</li>
+<p>ARM v6 has a <tt>rev</tt> instruction to convert big- and little-endian values. A sheevaplug uses ARM v5TE so we have to do the inversion explicitly</p>
+<pre class="example">
+<!--#include virtual="examples/endian.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ grep architecture /proc/cpuinfo
+CPU architecture: 5TE
+bob@poland:~/www/examples$
+bob@poland:~/www/examples$ gdb endian
+GNU gdb (GDB) 7.0.1-debian
+Copyright (C) 2009 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "arm-linux-gnueabi".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /home/bob/www/examples/endian...done.
+(gdb) b _start
+Breakpoint 1 at 0x8078: file endian.s, line 10.
+(gdb) b _stop
+Breakpoint 2 at 0x80a0: file endian.s, line 21.
+(gdb) run
+Starting program: /home/bob/www/examples/endian 
+
+Breakpoint 1, _start () at endian.s:11
+11		ldr	r0, [r1]		@ load word to r0
+Current language:  auto
+The current source language is "auto; currently asm".
+(gdb) x/x &vstart
+0x100a8 <vstart>:	0x12345678
+(gdb) cont
+Continuing.
+
+Breakpoint 2, _stop () at endian.s:22
+22		swi     0			@ then invoke the syscall from linux
+(gdb) p/x $r0
+$2 = 0x78563412
+(gdb) quit
+A debugging session is active.
+
+	Inferior 1 [process 17053] will be killed.
+
+Quit anyway? (y or n) y
+bob@poland:~/www/examples$
+</pre>
+<p>So we see the inverted data in <tt>r0</tt> when the program stops.</p>
+</ol>
+<h4>Structured Programs</h4>
+<ol>
+<li>A subroutine to display a vector of bytes</li>
+<p>We abstract the program given above as <tt>movtest3.s</tt> as follows.</p>
+<p>The subroutine to print is given by</p>
+<pre class="example">
+<!--#include virtual="examples/vprintb.s" -->
+</pre>
+<p>A simple test harness to use the subroutine is given by</p>
+<pre class="example">
+<!--#include virtual="examples/test_vprintb.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ make test_vprintb
+/usr/bin/gcc -gstabs -o test_vprintb test_vprintb.s vprintb.s
+bob@poland:~/www/examples$ ./test_vprintb
+The value is 10
+The value is 15
+The value is 20
+The value is 25
+The value is 30
+The value is 35
+The value is 40
+The value is 45
+The value is 50
+The value is 55
+The value is 60
+bob@poland:~/www/examples$
+</pre>
+<li>A subroutine to display a vector of words</li>
+<p>Start to change <tt>movtest3.s</tt> as follows.</p>
+<p>The subroutine to print is given by</p>
+<pre class="example">
+<!--#include virtual="examples/vprintw.s" -->
+</pre>
+<p>A simple test harness to use the subroutine is given by</p>
+<pre class="example">
+<!--#include virtual="examples/test_vprintw.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ make test_vprintw
+/usr/bin/gcc -gstabs -o test_vprintw test_vprintw.s vprintw.s
+bob@poland:~/www/examples$ ./test_vprintw
+Vector of words - values : 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60
+bob@poland:~/www/examples$
+</pre>
+<!-- <blink>TODO - an example here of a generic routine which can print either bytes or words</blink> -->
+<p>A more complex example - a bubble sort</p>
+<p>A bubble sort function</p>
+<pre class="example">
+<!--#include virtual="examples/bubble_sub.s" -->
+</pre>
+<p>A bubble sort test harness to use the subroutine</p>
+<pre class="example">
+<!--#include virtual="examples/bubble.s" -->
+</pre>
+<pre class="system">
+bob@poland:~/www/examples$ make bubble
+/usr/bin/gcc -gstabs -o bubble bubble.s bubble_sub.s vprintw.s
+bob@poland:~/www/examples$ ./bubble 
+Before sorting, values are : 105, -7, 235, 61, 28, 315, 456, 63, 134, 97, 221, 53, 1000899, 145, 117, 5
+After sorting,  values are : -7, 5, 28, 53, 61, 63, 97, 105, 117, 134, 145, 221, 235, 315, 456, 1000899
+bob@poland:~/www/examples$
+</pre>
+</ol>
+</body>
