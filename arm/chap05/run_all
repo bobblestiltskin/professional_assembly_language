@@ -1,0 +1,1 @@
+./bubble; ./cmovtest; ./swaptest1; ./swaptest2; ./movtest1; ./movtest2; ./movtest3; ./movtest4; ./sizetest1; ./sizetest2; ./sizetest3; ./endian; ./test_vprintb;  ./test_vprintw
