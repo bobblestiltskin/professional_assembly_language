@@ -3,7 +3,10 @@ CC	:= /usr/bin/gcc
 LD	:= /usr/bin/ld
 
 ASOPTS	:= -gstabs
-CCOPTS	:= 
+CCOPTS	:= -gstabs
+
+ARCH = $(shell sed -ne 's/^Processor\s*:.*(v\([0-9]\)l)/\1/p' /proc/cpuinfo)
+#ARCH = $(shell sed -ne 's/^CPU architecture: //p' /proc/cpuinfo | tr [:upper:] [:lower:])
 
 bubble: bubble.s bubble_sub.s vprintw.s
 
@@ -20,8 +23,14 @@ swaptest1: swaptest1.s
 	$(LD) -o $@ $@.o
 
 endian: endian.s
-	$(AS) $(ASOPTS) -o $@.o $^
+	echo ARCH is $(ARCH)
+	$(AS) $(ASOPTS) -march=armv$(ARCH) -o $@.o $^
+#	$(AS) $(ASOPTS) -o $@.o $^
 	$(LD) -o $@ $@.o
+
+endian.s: endian.cpp
+	echo ARCH is $(ARCH)
+	$(CC) $(CCOPTS) -E -DARCH=$(ARCH) -o $@ $^
 
 movtest4: movtest4.s
 	$(AS) $(ASOPTS) -o $@.o $^
