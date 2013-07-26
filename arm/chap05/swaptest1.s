@@ -4,7 +4,6 @@ data:
    .int 10
 .text
 .globl _start
-	.align 2
 _start:
 	ldr	r4, =data	@ load address of data to r4
 	mov	r5, #5		@ store literal 5 to r5

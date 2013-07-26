@@ -261,5 +261,11 @@ Before sorting, values are : 105, -7, 235, 61, 28, 315, 456, 63, 134, 97, 221, 5
 After sorting,  values are : -7, 5, 28, 53, 61, 63, 97, 105, 117, 134, 145, 221, 235, 315, 456, 1000899
 bob@poland:~/www/examples$
 </pre>
+<p>A program to demonstrate the use of the floating-point unit - works on the RPi</p>
+<pre class="example">
+<!--#include virtual="examples/fp_mul.s" -->
+</pre>
+<li>A number of problems from projecteuler.net coded in ARM assembly language</li>
+Problems <a href="http://www.fourtheye.org/cgi-bin/language.pl?language=asm">here</a>
 </ol>
 </body>

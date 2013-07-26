@@ -6,7 +6,6 @@ data:
 .section .text
 .globl _start
 _start:
-   nop
    movl $24420, %ecx
    movw $350, %bx
    movb $100, %eax

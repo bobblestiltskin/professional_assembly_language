@@ -10,7 +10,6 @@
 #
 .globl _vprintw
 .equ datum_size,4
-.align 2
 _vprintw:
 	stmfd	sp!, {r4, r5, r6, r7, lr}	@ save registers on the stack
 	cmp	r1, #0				@ exit if no elements
@@ -22,14 +21,12 @@ _vprintw:
 	ldr	r1, [r4], #datum_size		@ load first vector element to r0 and bump pointer
 	mov	r0, r6				@ address of first string to r0
 	bl 	printf				@ and print itt
-	nop
 	subs	r5, r5, #1			@ decrement counter
 	beq	last				@ and fall out if zero
 vprintw_loop:
 	ldr	r1, [r4], #datum_size		@ load next vector item to r0 and bump pointer
 	mov	r0, r7				@ address of subsequent string to r0
 	bl 	printf				@ and print it
-	nop
 	subs	r5, r5, #1			@ decrement counter
 	bne	vprintw_loop			@ and loop if non-zero
 last:

@@ -9,7 +9,6 @@
 #
 .globl _vprintb
 .equ datum_size,1
-.align 2
 _vprintb:
 	stmfd	sp!, {r4, r5, r6, lr}
 	mov	r4, r0
@@ -19,7 +18,6 @@ vprintb_loop:
 	ldrb	r1, [r4], #datum_size
 	mov	r0, r6
 	bl 	printf
-	nop
 	subs	r5, r5, #1
 	bne	vprintb_loop
 

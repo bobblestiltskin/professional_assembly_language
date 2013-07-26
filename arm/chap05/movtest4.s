@@ -1,12 +1,10 @@
 # movtest4.s – An example of indirect addressing
 .equ datum_size,1
 .globl _start
-.align 2
 .section .data
 values:
    .byte 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60
 .text
-.align 2
 _start:
 	ldr	r4, =values
 	mov	r5, #100

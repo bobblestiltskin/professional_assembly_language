@@ -1,9 +1,9 @@
 .section	.rodata
-	.align	2
+#	.align	2
 string:
 	.asciz "Sum of %d and %d is %d\n"
 .text
-	.align	2
+#	.align	2
 	.global	main
 	.type	main, %function
 main:

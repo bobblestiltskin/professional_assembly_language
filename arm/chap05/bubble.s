@@ -6,7 +6,6 @@
 #.equ items,0
 #.equ items,1
 .equ datum_size,4
-        .align 2
 .section .rodata
 before:
 	.asciz "Before sorting, values are : %d" 
@@ -24,10 +23,8 @@ values:
 evalues:
 	.word 1, 2, 3
 
-        .align 2
-        .text
+.text
 main:
-	nop
 	ldr	r0, =values
 	mov	r1, #items
 	ldr	r2, =before

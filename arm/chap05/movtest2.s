@@ -3,9 +3,7 @@
 
 .section .data
 value: .byte 42
-
-        .align 2
-        .text
+.text
 _start:
         ldr	r1, =value
 	mov	r0, #9

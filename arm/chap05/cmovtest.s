@@ -4,11 +4,9 @@
 .section .rodata
 output:
    .asciz "The largest value is %d\n"
-.align 2
 values:
    .hword 105, 235, 61, 315, 134, 221, 53, 145, 117, 5
 endvalues:
-.align 2
 .text
 main:
 	ldr	r3, =values		@ address of start of data

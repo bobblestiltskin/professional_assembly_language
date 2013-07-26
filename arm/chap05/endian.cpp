@@ -1,7 +1,6 @@
 @ swaptest.s – Converting big-endian to little-endian and vice-versa
 @  In Arm V6 we can use the  rev instruction - but not supported here 
 
-.syntax unified
 .globl _start
 .section .data
 vstart:

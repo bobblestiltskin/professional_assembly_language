@@ -5,7 +5,6 @@
 .section .rodata
 value: .byte 42
 
-        .align 2
         .text
 _start:
 	ldr	r1, =value
