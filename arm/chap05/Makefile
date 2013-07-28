@@ -24,13 +24,8 @@ swaptest1: swaptest1.s
 
 endian: endian.s
 	echo ARCH is $(ARCH)
-	$(AS) $(ASOPTS) -march=armv$(ARCH) -o $@.o $^
-#	$(AS) $(ASOPTS) -o $@.o $^
+	$(AS) $(ASOPTS) --defsym ARCH=$(ARCH) -march=armv$(ARCH) -o $@.o $^
 	$(LD) -o $@ $@.o
-
-endian.s: endian.cpp
-	echo ARCH is $(ARCH)
-	$(CC) $(CCOPTS) -E -DARCH=$(ARCH) -o $@ $^
 
 movtest4: movtest4.s
 	$(AS) $(ASOPTS) -o $@.o $^
